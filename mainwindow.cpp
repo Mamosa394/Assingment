@@ -5,6 +5,8 @@
 #include <QBrush>
 #include <QFont>
 #include <QScrollArea>
+#include <algorithm>
+#include <vector>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle("Data Structures Assignment 2026");
@@ -19,12 +21,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
         /* SIDEBAR */
         "QWidget#Sidebar { background-color: #000000; }"
-        "QLabel#SidebarTitle { color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1px; }"
-        "QLabel#SidebarText { color: #9aa0a6; font-size: 13px; }"
-        "QPushButton#MenuBtn { background-color: transparent; color: #9aa0a6; border: none; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; }"
+        "QWidget#Sidebar QLabel { background: transparent; }"
+        "QWidget#Sidebar QPushButton { background: transparent; }"
+        "QLabel#SidebarTitle { color: #ffffff; background: transparent; font-size: 22px; font-weight: 800; letter-spacing: 1px; }"
+        "QLabel#SidebarText  { color: #9aa0a6; background: transparent; font-size: 13px; }"
+        "QPushButton#MenuBtn { background: transparent; color: #9aa0a6; border: none; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; }"
         "QPushButton#MenuBtn:hover { color: #ffffff; background-color: #2d2d2d; }"
         "QPushButton#MenuBtn[active='true'] { color: #1a1a1a; background-color: #ffffff; }"
-
         /* BUTTONS */
         "QPushButton#ActionBtn { background-color: #1a1a1a; color: #ffffff; border: none; border-radius: 6px; padding: 12px 24px; font-weight: bold; font-size: 14px; min-width: 100px; }"
         "QPushButton#ActionBtn:hover { background-color: #333333; }"
@@ -63,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     mainLayout->addWidget(stack);
     setCentralWidget(central);
 
-    showDijkstraPage();
+    showOpenPage();
 }
 
 MainWindow::~MainWindow() {
@@ -184,8 +187,10 @@ QWidget* MainWindow::buildOpenPage() {
     cLayout->addWidget(addBtn);
     cLayout->addWidget(remBtn);
 
-    openOutput = new QTextEdit; openOutput->setReadOnly(true);
-    openOutput->setPlainText(openSet->display());
+    openOutput = new QTextEdit;
+    openOutput->setReadOnly(true);
+    openOutput->setAcceptRichText(true);
+    openOutput->setHtml(openSet->displayAsTable());
 
     QWidget* content = new QWidget;
     QVBoxLayout* contLayout = new QVBoxLayout(content);
@@ -209,7 +214,7 @@ void MainWindow::addOpenItem() {
     if (!ok) { QMessageBox::warning(this, "Error", "Key must be a valid integer."); return; }
     std::string val = openValueInput->text().toStdString();
     openSet->insert(key, val);
-    openOutput->setPlainText(openSet->display());
+    openOutput->setHtml(openSet->displayAsTable());
     openKeyInput->clear(); openValueInput->clear();
 }
 
@@ -218,31 +223,67 @@ void MainWindow::removeOpenItem() {
     int key = openKeyInput->text().toInt(&ok);
     if (!ok) { QMessageBox::warning(this, "Error", "Key must be a valid integer."); return; }
     openSet->remove(key);
-    openOutput->setPlainText(openSet->display());
+    openOutput->setHtml(openSet->displayAsTable());
     openKeyInput->clear();
 }
 
 // ==========================================
-// CLOSED HASHING
+// CLOSED HASHING  (Linear Probing)
 // ==========================================
+//
+// KEY   = a unique integer. It is hashed with  key % capacity  to pick
+//         the STARTING slot. You can insert the same key again to
+//         overwrite its value, but you cannot have two entries with the
+//         same key.
+//
+// VALUE = the text payload stored alongside the key. Many keys may hold
+//         the same value; values are what get()/contains() return.
+//
+// LINEAR PROBING — when a key's hash slot is already taken by a DIFFERENT
+// key, we step forward one slot at a time (with wrap-around) until we
+// find a free slot (empty or a reusable tombstone). Lookups follow the
+// exact same probe sequence, and stop as soon as they hit a truly empty
+// slot (which proves the key was never inserted) or find the key.
+// ---------------------------------------------------------------
 
 QWidget* MainWindow::buildClosedPage() {
     QWidget* page = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout(page);
     layout->setContentsMargins(50, 50, 50, 50);
 
-    layout->addWidget(buildHeader("Closed Hashing", "Linear Probing with automatic rehashing at 0.5 load factor."));
+    layout->addWidget(buildHeader(
+        "Closed Hashing",
+        "Linear probing with automatic rehashing at 0.5 load factor."));
 
+    // ---------- Controls row 1: Key + Value + Insert + Remove ----------
     QWidget* controls = new QWidget;
     QHBoxLayout* cLayout = new QHBoxLayout(controls);
-    cLayout->setContentsMargins(0,0,0,0);
+    cLayout->setContentsMargins(0, 0, 0, 0);
     cLayout->setSpacing(15);
 
-    closedKeyInput = new QLineEdit; closedKeyInput->setPlaceholderText("Key (Integer)");
-    closedValueInput = new QLineEdit; closedValueInput->setPlaceholderText("Value (String)");
+    closedKeyInput = new QLineEdit;
+    closedKeyInput->setPlaceholderText("Key  =  integer ID (e.g. 42)");
+    closedKeyInput->setToolTip(
+        "KEY: a unique integer.\n"
+        "It is hashed with  key % capacity  to pick the starting slot.\n"
+        "You cannot change a key once inserted; re-inserting a key just\n"
+        "overwrites its VALUE.");
 
-    QPushButton* addBtn = new QPushButton("Insert"); addBtn->setObjectName("ActionBtn");
-    QPushButton* remBtn = new QPushButton("Remove"); remBtn->setObjectName("DangerBtn");
+    closedValueInput = new QLineEdit;
+    closedValueInput->setPlaceholderText("Value  =  text payload (e.g. \"Alice\")");
+    closedValueInput->setToolTip(
+        "VALUE: any text stored alongside the key.\n"
+        "Lookups (get / contains) use the KEY; the VALUE is what you\n"
+        "retrieve. Values may repeat; keys may not.");
+
+    QPushButton* addBtn = new QPushButton("Insert");
+    addBtn->setObjectName("ActionBtn");
+    addBtn->setToolTip("Adds the (key, value) pair, or updates the value if the key already exists.");
+
+    QPushButton* remBtn = new QPushButton("Remove");
+    remBtn->setObjectName("DangerBtn");
+    remBtn->setToolTip("Removes the entry for this key. The slot becomes a tombstone\n"
+                       "so that probing for other keys still works.");
 
     connect(addBtn, &QPushButton::clicked, this, &MainWindow::addClosedItem);
     connect(remBtn, &QPushButton::clicked, this, &MainWindow::removeClosedItem);
@@ -252,14 +293,52 @@ QWidget* MainWindow::buildClosedPage() {
     cLayout->addWidget(addBtn);
     cLayout->addWidget(remBtn);
 
-    closedOutput = new QTextEdit; closedOutput->setReadOnly(true);
-    closedOutput->setPlainText(closedSet->display());
+    // ---------- Controls row 2: Get / Contains / Clear ----------
+    QWidget* controls2 = new QWidget;
+    QHBoxLayout* c2Layout = new QHBoxLayout(controls2);
+    c2Layout->setContentsMargins(0, 0, 0, 0);
+    c2Layout->setSpacing(15);
+
+    QPushButton* getBtn = new QPushButton("Get Value");
+    getBtn->setObjectName("ActionBtn");
+    getBtn->setToolTip("Look up the VALUE for the key in the Key field.");
+    connect(getBtn, &QPushButton::clicked, this, &MainWindow::doClosedGet);
+
+    QPushButton* containsBtn = new QPushButton("Contains Key?");
+    containsBtn->setObjectName("ActionBtn");
+    containsBtn->setToolTip("Returns true if the key exists, false otherwise.");
+    connect(containsBtn, &QPushButton::clicked, this, &MainWindow::doClosedContains);
+
+    QPushButton* clearBtn = new QPushButton("Clear Table");
+    clearBtn->setObjectName("DangerBtn");
+    clearBtn->setToolTip("Removes every entry and resets the table.");
+    connect(clearBtn, &QPushButton::clicked, this, &MainWindow::clearClosedSet);
+
+    c2Layout->addWidget(getBtn);
+    c2Layout->addWidget(containsBtn);
+    c2Layout->addStretch();
+    c2Layout->addWidget(clearBtn);
+
+    // ---------- Status line ----------
+    closedStatusLabel = new QLabel("Ready. Load factor target: 0.5. Capacity grows by rehashing.");
+    closedStatusLabel->setStyleSheet(
+        "font-family: Consolas, monospace; font-size: 13px; color: #1a1a1a;"
+        "background: #f1f3f4; border-radius: 6px; padding: 10px;");
+
+    // ---------- The table itself ----------
+    closedOutput = new QTextEdit;
+    closedOutput->setReadOnly(true);
+    closedOutput->setAcceptRichText(true);
+    closedOutput->setHtml(closedSet->displayAsTable());
 
     QWidget* content = new QWidget;
     QVBoxLayout* contLayout = new QVBoxLayout(content);
-    contLayout->setContentsMargins(0,0,0,0);
+    contLayout->setContentsMargins(0, 0, 0, 0);
     contLayout->addWidget(controls);
-    contLayout->addSpacing(25);
+    contLayout->addWidget(controls2);
+    contLayout->addSpacing(15);
+    contLayout->addWidget(closedStatusLabel);
+    contLayout->addSpacing(15);
     contLayout->addWidget(closedOutput);
 
     layout->addWidget(createCard(content));
@@ -271,23 +350,104 @@ QWidget* MainWindow::buildClosedPage() {
     return scrollArea;
 }
 
+void MainWindow::showClosedStatus(const QString& msg) {
+    closedStatusLabel->setText(msg);
+}
+
 void MainWindow::addClosedItem() {
     bool ok;
     int key = closedKeyInput->text().toInt(&ok);
-    if (!ok) { QMessageBox::warning(this, "Error", "Key must be a valid integer."); return; }
+    if (!ok) {
+        QMessageBox::warning(this, "Error", "Key must be a valid integer.");
+        return;
+    }
     std::string val = closedValueInput->text().toStdString();
+
+    int beforeCap   = closedSet->getCapacity();
+    int beforeCount = closedSet->getCount();
+
     closedSet->insert(key, val);
-    closedOutput->setPlainText(closedSet->display());
-    closedKeyInput->clear(); closedValueInput->clear();
+
+    int afterCap   = closedSet->getCapacity();
+    int afterCount = closedSet->getCount();
+
+    QString msg;
+    if (afterCap != beforeCap) {
+        msg = QString("Inserted (%1 -> \"%2\"). Load factor threshold reached — REHASHED from %3 to %4 slots.")
+                  .arg(key).arg(QString::fromStdString(val))
+                  .arg(beforeCap).arg(afterCap);
+    } else if (afterCount == beforeCount) {
+        msg = QString("Key %1 already existed — VALUE updated to \"%2\".")
+                  .arg(key).arg(QString::fromStdString(val));
+    } else {
+        msg = QString("Inserted key %1 with value \"%2\". "
+                      "Check the 'Probed?' column — a blue row means linear probing was used to resolve a collision.")
+                  .arg(key).arg(QString::fromStdString(val));
+    }
+
+    closedOutput->setHtml(closedSet->displayAsTable());
+    showClosedStatus(msg);
+    closedKeyInput->clear();
+    closedValueInput->clear();
 }
 
 void MainWindow::removeClosedItem() {
     bool ok;
     int key = closedKeyInput->text().toInt(&ok);
-    if (!ok) { QMessageBox::warning(this, "Error", "Key must be a valid integer."); return; }
-    closedSet->remove(key);
-    closedOutput->setPlainText(closedSet->display());
+    if (!ok) {
+        QMessageBox::warning(this, "Error", "Key must be a valid integer.");
+        return;
+    }
+    bool removed = closedSet->remove(key);
+    closedOutput->setHtml(closedSet->displayAsTable());
+    showClosedStatus(removed
+                         ? QString("Removed key %1. Slot is now a TOMBSTONE — lookups skip over it while probing.")
+                               .arg(key)
+                         : QString("Key %1 was not in the table.").arg(key));
     closedKeyInput->clear();
+}
+
+void MainWindow::doClosedGet() {
+    bool ok;
+    int key = closedKeyInput->text().toInt(&ok);
+    if (!ok) {
+        QMessageBox::warning(this, "Error", "Key must be a valid integer.");
+        return;
+    }
+    std::string out;
+    if (closedSet->get(key, out)) {
+        showClosedStatus(QString("get(%1) → \"%2\"").arg(key).arg(QString::fromStdString(out)));
+    } else {
+        showClosedStatus(QString("get(%1) → (not found)").arg(key));
+    }
+}
+
+void MainWindow::doClosedContains() {
+    bool ok;
+    int key = closedKeyInput->text().toInt(&ok);
+    if (!ok) {
+        QMessageBox::warning(this, "Error", "Key must be a valid integer.");
+        return;
+    }
+    bool present = closedSet->contains(key);
+    showClosedStatus(QString("contains(%1) → %2")
+                         .arg(key)
+                         .arg(present ? "true" : "false"));
+}
+
+void MainWindow::clearClosedSet() {
+    if (closedSet->isEmpty()) {
+        showClosedStatus("Table is already empty.");
+        return;
+    }
+    auto reply = QMessageBox::question(this, "Clear Table",
+                                       "Remove all entries? This cannot be undone.",
+                                       QMessageBox::Yes | QMessageBox::No);
+    if (reply != QMessageBox::Yes) return;
+
+    closedSet->clear();
+    closedOutput->setHtml(closedSet->displayAsTable());
+    showClosedStatus("Table cleared. All slots are empty.");
 }
 
 // ==========================================
@@ -300,15 +460,18 @@ QWidget* MainWindow::buildDijkstraPage() {
     layout->setContentsMargins(50, 50, 50, 50);
     layout->setSpacing(25);
 
-    layout->addWidget(buildHeader("Dijkstra Router", "Calculate the shortest distance between Maseru and TY using the visual graph."));
+    layout->addWidget(buildHeader(
+        "Dijkstra Router",
+        "Shortest path from Maseru (A) to any town using Dijkstra's algorithm. "
+        "Negative edges are rejected; unreachable vertices are shown as ∞."));
 
     QHBoxLayout* topLayout = new QHBoxLayout;
     topLayout->setSpacing(25);
 
-    // Left Card: Visual Map
+    // ----- Left card: the map -----
     QWidget* mapWidget = new QWidget;
     QVBoxLayout* mapLayout = new QVBoxLayout(mapWidget);
-    mapLayout->setContentsMargins(0,0,0,0);
+    mapLayout->setContentsMargins(0, 0, 0, 0);
 
     QLabel* mapTitle = new QLabel("THE MAP");
     mapTitle->setObjectName("SubText");
@@ -320,14 +483,14 @@ QWidget* MainWindow::buildDijkstraPage() {
     mapScene = new QGraphicsScene(this);
     mapView->setScene(mapScene);
 
-    drawMap("", ""); // Initial draw
+    drawMap(QStringList{});
     mapLayout->addWidget(mapTitle);
     mapLayout->addWidget(mapView);
 
-    // Right Card: Calculator
+    // ----- Right card: calculator -----
     QWidget* calcWidget = new QWidget;
     QVBoxLayout* calcLayout = new QVBoxLayout(calcWidget);
-    calcLayout->setContentsMargins(0,0,0,0);
+    calcLayout->setContentsMargins(0, 0, 0, 0);
 
     QLabel* startLabel = new QLabel("STARTING POINT");
     startLabel->setObjectName("SubText");
@@ -358,17 +521,19 @@ QWidget* MainWindow::buildDijkstraPage() {
     topLayout->addWidget(createCard(calcWidget), 1);
     layout->addLayout(topLayout);
 
-    // Bottom Card: Result
+    // ----- Bottom card: results -----
     QWidget* resultWidget = new QWidget;
     QVBoxLayout* resLayout = new QVBoxLayout(resultWidget);
-    resLayout->setContentsMargins(0,0,0,0);
+    resLayout->setContentsMargins(0, 0, 0, 0);
 
     resultDistanceLabel = new QLabel("-- km");
     resultDistanceLabel->setObjectName("ResultLabel");
 
     QHBoxLayout* distRow = new QHBoxLayout;
     QLabel* mapIcon = new QLabel();
-    mapIcon->setPixmap(QPixmap(":/icons/map.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    mapIcon->setPixmap(QPixmap(":/icons/map.png").scaled(40, 40,
+                                                         Qt::KeepAspectRatio,
+                                                         Qt::SmoothTransformation));
     distRow->addWidget(mapIcon);
     distRow->addSpacing(15);
     distRow->addWidget(resultDistanceLabel);
@@ -383,12 +548,32 @@ QWidget* MainWindow::buildDijkstraPage() {
     routeLbl->setObjectName("SubText");
     resultPathLabel = new QLabel("N/A");
     resultPathLabel->setStyleSheet("font-weight: bold; font-size: 20px; margin-top: 5px;");
+    resultPathLabel->setWordWrap(true);
     routeLayout->addWidget(routeLbl);
     routeLayout->addWidget(resultPathLabel);
 
     resLayout->addLayout(distRow);
     resLayout->addWidget(line);
     resLayout->addLayout(routeLayout);
+
+    // ---- Distance-to-every-town table ----
+    QFrame* line2 = new QFrame;
+    line2->setFrameShape(QFrame::HLine);
+    line2->setStyleSheet("color: #e4e7eb; margin: 15px 0;");
+
+    QLabel* distLbl = new QLabel("DISTANCE TO EVERY TOWN (from selected start)");
+    distLbl->setObjectName("SubText");
+
+    resultDistancesTable = new QTextEdit;
+    resultDistancesTable->setReadOnly(true);
+    resultDistancesTable->setAcceptRichText(true);
+    resultDistancesTable->setMinimumHeight(140);
+    resultDistancesTable->setHtml(
+        "<span style='color:#5f6368;'>Click “Calculate Route” to populate.</span>");
+
+    resLayout->addWidget(line2);
+    resLayout->addWidget(distLbl);
+    resLayout->addWidget(resultDistancesTable);
 
     layout->addWidget(createCard(resultWidget));
 
@@ -399,29 +584,36 @@ QWidget* MainWindow::buildDijkstraPage() {
     return scrollArea;
 }
 
-void MainWindow::drawMap(const QString& highlightStart, const QString& highlightTarget) {
+void MainWindow::drawMap(const QStringList& pathVertices) {
     mapScene->clear();
 
-    // Coordinates for cities (A=TopLeft, B=TopRight, C=BottomLeft, D=BottomRight)
-    QPointF pA(50, 50);   // Maseru
-    QPointF pB(250, 50);  // Mohale
-    QPointF pC(50, 200);  // Leribe
-    QPointF pD(250, 200); // TY
+    const QPointF pA(50,  50);    // Maseru
+    const QPointF pB(250, 50);    // Mohale
+    const QPointF pC(50,  200);   // Leribe
+    const QPointF pD(250, 200);   // TY
 
-    // Draw Lines (Roads)
-    auto drawEdge = [&](QPointF p1, QPointF p2, int weight, QString from, QString to) {
-        QPen pen(Qt::gray, 3, Qt::DashLine);
-        if ((highlightStart == from && highlightTarget == to) || (highlightStart == to && highlightTarget == from)) {
-            pen.setColor(Qt::black);
-            pen.setStyle(Qt::SolidLine);
-            pen.setWidth(4);
+    auto onPath = [&](const QString& a, const QString& b) {
+        for (int i = 0; i + 1 < pathVertices.size(); ++i) {
+            if ((pathVertices[i] == a && pathVertices[i+1] == b) ||
+                (pathVertices[i] == b && pathVertices[i+1] == a)) return true;
         }
+        return false;
+    };
+
+    auto drawEdge = [&](QPointF p1, QPointF p2, int weight,
+                        const QString& from, const QString& to) {
+        bool hot = onPath(from, to);
+        QPen pen(hot ? Qt::black : Qt::gray,
+                 hot ? 4 : 3,
+                 hot ? Qt::SolidLine : Qt::DashLine);
         mapScene->addLine(p1.x(), p1.y(), p2.x(), p2.y(), pen);
 
-        // Draw distance text
-        QGraphicsTextItem* text = mapScene->addText(QString::number(weight) + " km");
-        text->setDefaultTextColor(Qt::darkGray);
-        text->setPos((p1.x() + p2.x())/2 - 15, (p1.y() + p2.y())/2 - 10);
+        QGraphicsTextItem* t = mapScene->addText(QString::number(weight) + " km");
+        t->setDefaultTextColor(hot ? Qt::black : Qt::darkGray);
+        QFont f = t->font();
+        f.setBold(hot);
+        t->setFont(f);
+        t->setPos((p1.x() + p2.x())/2 - 15, (p1.y() + p2.y())/2 - 10);
     };
 
     drawEdge(pA, pB, 3, "A", "B");
@@ -429,23 +621,19 @@ void MainWindow::drawMap(const QString& highlightStart, const QString& highlight
     drawEdge(pB, pD, 2, "B", "D");
     drawEdge(pC, pD, 4, "C", "D");
 
-    // Draw Nodes (Cities)
-    auto drawNode = [&](QPointF p, QString label, QString id) {
-        QBrush brush(Qt::white);
-        QPen pen(Qt::black, 2);
-        if (id == highlightStart || id == highlightTarget) {
-            brush.setColor(Qt::black);
-            pen.setColor(Qt::black);
-        }
+    auto drawNode = [&](QPointF p, const QString& label, const QString& id) {
+        bool hot = pathVertices.contains(id);
+        QBrush brush(hot ? Qt::black : Qt::white);
+        QPen   pen  (Qt::black, 2);
         mapScene->addEllipse(p.x() - 20, p.y() - 20, 40, 40, pen, brush);
 
-        QGraphicsTextItem* text = mapScene->addText(label);
-        text->setDefaultTextColor(id == highlightStart || id == highlightTarget ? Qt::white : Qt::black);
-        QFont font = text->font();
-        font.setBold(true);
-        font.setPointSize(10);
-        text->setFont(font);
-        text->setPos(p.x() - 10, p.y() - 10);
+        QGraphicsTextItem* t = mapScene->addText(label);
+        t->setDefaultTextColor(hot ? Qt::white : Qt::black);
+        QFont f = t->font();
+        f.setBold(true);
+        f.setPointSize(10);
+        t->setFont(f);
+        t->setPos(p.x() - 10, p.y() - 10);
     };
 
     drawNode(pA, "A", "A");
@@ -454,50 +642,139 @@ void MainWindow::drawMap(const QString& highlightStart, const QString& highlight
     drawNode(pD, "D", "D");
 }
 
+QString MainWindow::formatDistanceTable(const std::unordered_map<std::string, int>& distances,
+                                        const std::string& startNode,
+                                        const std::string& targetNode) const {
+    auto pretty = [](const std::string& id) -> QString {
+        if (id == "A") return "Maseru (A)";
+        if (id == "B") return "Mohale (B)";
+        if (id == "C") return "Leribe (C)";
+        if (id == "D") return "TY (D)";
+        return QString::fromStdString(id);
+    };
+
+    QString html;
+    html += "<table cellspacing='0' cellpadding='6' border='1' "
+            "style='border-collapse:collapse; font-family:Consolas,monospace; "
+            "font-size:13px; width:100%;'>"
+            "<tr style='background:#1a1a1a; color:#ffffff;'>"
+            "<th>Vertex</th><th>Distance from start</th><th>Status</th>"
+            "</tr>";
+
+    const std::vector<std::string> order = {"A", "B", "C", "D"};
+    for (const auto& id : order) {
+        auto it = distances.find(id);
+        if (it == distances.end()) continue;
+
+        QString bg = "#ffffff";
+        if (id == startNode)       bg = "#fff4e5";
+        else if (id == targetNode) bg = "#e8f5e9";
+        else if (it->second == INT_MAX) bg = "#fafafa";
+
+        QString distTxt = (it->second == INT_MAX)
+                              ? QString("∞ (unreachable)")
+                              : QString("%1 km").arg(it->second);
+
+        QString status = (id == startNode)  ? "start"
+                         : (id == targetNode) ? "target"
+                         : (it->second == INT_MAX) ? "unreachable"
+                                                   : "reachable";
+
+        html += QString("<tr style='background:%1;'>"
+                        "<td>%2</td>"
+                        "<td align='center'>%3</td>"
+                        "<td align='center'>%4</td>"
+                        "</tr>")
+                    .arg(bg, pretty(id), distTxt, status);
+    }
+
+    html += "</table>";
+    return html;
+}
+
 void MainWindow::calculateRoute() {
+    // ---- Build the assignment's weighted directed graph ----
     std::unordered_map<std::string, std::vector<Edge>> graph;
     graph["A"] = { Edge("B", 3), Edge("C", 1) };
     graph["B"] = { Edge("D", 2) };
     graph["C"] = { Edge("D", 4) };
     graph["D"] = {};
 
-    QString startTxt = startDropdown->currentText();
-    QString targetTxt = targetDropdown->currentText();
+    // Map the human-readable combo text to node IDs.
+    auto textToId = [](const QString& t) -> std::string {
+        if (t.contains("Maseru"))  return "A";
+        if (t.contains("Mohale"))  return "B";
+        if (t.contains("Leribe"))  return "C";
+        return "D";                                  // TY
+    };
 
-    std::string startNode = startTxt.contains("Maseru") ? "A" : startTxt.contains("Mohale") ? "B" : startTxt.contains("Leribe") ? "C" : "D";
-    std::string targetNode = targetTxt.contains("Maseru") ? "A" : targetTxt.contains("Mohale") ? "B" : targetTxt.contains("Leribe") ? "C" : "D";
+    const std::string startNode  = textToId(startDropdown->currentText());
+    const std::string targetNode = textToId(targetDropdown->currentText());
 
+    // ---- Source == destination shortcut ----
     if (startNode == targetNode) {
         resultDistanceLabel->setText("0 km");
-        resultPathLabel->setText(startTxt);
-        drawMap(QString::fromStdString(startNode), QString::fromStdString(targetNode));
+        resultPathLabel->setText(startDropdown->currentText());
+        drawMap(QStringList{ QString::fromStdString(startNode) });
+
+        DijkstraResult self = runDijkstra(graph, startNode);
+        if (self.valid) {
+            resultDistancesTable->setHtml(
+                formatDistanceTable(self.distances, startNode, targetNode));
+        }
         return;
     }
 
+    // ---- Run Dijkstra ----
     DijkstraResult res = runDijkstra(graph, startNode);
 
+    // Negative edge or missing source
     if (!res.valid) {
         resultDistanceLabel->setText("Error");
         resultPathLabel->setText(res.errorMessage);
+        resultDistancesTable->setHtml(
+            QString("<span style='color:#d93025;'>%1</span>")
+                .arg(res.errorMessage.toHtmlEscaped()));
+        drawMap(QStringList{});
         return;
     }
 
-    int d = res.distances.at(targetNode);
-    if (d == INT_MAX) {
+    // ---- Target distance (safe lookup — never throws) ----
+    auto it = res.distances.find(targetNode);
+    if (it == res.distances.end() || it->second == INT_MAX) {
         resultDistanceLabel->setText("Unreachable");
-        resultPathLabel->setText("No valid route.");
-        drawMap("", "");
+        resultPathLabel->setText(
+            QString("No route from %1 to %2.")
+                .arg(startDropdown->currentText(), targetDropdown->currentText()));
+        resultDistancesTable->setHtml(
+            formatDistanceTable(res.distances, startNode, targetNode));
+        drawMap(QStringList{ QString::fromStdString(startNode) });
         return;
     }
 
-    resultDistanceLabel->setText(QString("%1 km").arg(d));
+    const int distance = it->second;
+    resultDistanceLabel->setText(QString("%1 km").arg(distance));
 
+    // ---- Path ----
     auto pathList = reconstructPath(res.previous, startNode, targetNode);
-    QString pathStr = printPath(pathList);
-    resultPathLabel->setText(pathStr);
+    if (pathList.empty()) {
+        resultPathLabel->setText("Path reconstruction failed (unexpected).");
+        resultDistancesTable->setHtml(
+            formatDistanceTable(res.distances, startNode, targetNode));
+        drawMap(QStringList{ QString::fromStdString(startNode) });
+        return;
+    }
 
-    // Highlight the path on the map
-    drawMap(QString::fromStdString(startNode), QString::fromStdString(targetNode));
+    QStringList pathIds;
+    for (const auto& v : pathList) pathIds << QString::fromStdString(v);
+    resultPathLabel->setText(printPath(pathList));
+
+    // ---- Highlight the full path on the map ----
+    drawMap(pathIds);
+
+    // ---- Full distance table ----
+    resultDistancesTable->setHtml(
+        formatDistanceTable(res.distances, startNode, targetNode));
 }
 
 // ==========================================
@@ -558,28 +835,54 @@ void MainWindow::runDijkstraFile() {
         return;
     }
     QTextStream in(&file);
+
     std::unordered_map<std::string, std::vector<Edge>> graph;
+
+    // File format:
+    //   <source>              (first line)
+    //   <edge count>          (second line)
+    //   <u> <v> <weight>      (one per line)
     std::string source = in.readLine().trimmed().toStdString();
     int edges = in.readLine().toInt();
 
-    for (int i = 0; i < edges; i++) {
+    for (int i = 0; i < edges && !in.atEnd(); ++i) {
         QString line = in.readLine();
         QStringList parts = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-        if (parts.size() == 3) {
-            graph[parts[0].toStdString()].push_back(Edge(parts[1].toStdString(), parts[2].toInt()));
-            if (graph.find(parts[1].toStdString()) == graph.end()) graph[parts[1].toStdString()] = {};
-        }
+        if (parts.size() != 3) continue;
+        bool okW = false;
+        int w = parts[2].toInt(&okW);
+        if (!okW) continue;
+
+        const std::string u = parts[0].toStdString();
+        const std::string v = parts[1].toStdString();
+        graph[u].push_back(Edge(v, w));
+        if (graph.find(v) == graph.end()) graph[v] = {};
     }
     if (graph.find(source) == graph.end()) graph[source] = {};
 
     DijkstraResult res = runDijkstra(graph, source);
-    QString log = QString("Source: %1\n\n").arg(QString::fromStdString(source));
 
-    if (!res.valid) { fileOutput->setPlainText(log + res.errorMessage); return; }
+    if (!res.valid) {
+        fileOutput->setPlainText(
+            QString("Source: %1\n\n%2").arg(QString::fromStdString(source), res.errorMessage));
+        return;
+    }
 
-    for (const auto& p : res.distances) {
-        log += QString("%1: %2\n").arg(QString::fromStdString(p.first))
-        .arg(p.second == INT_MAX ? "unreachable" : QString::number(p.second));
+    // Stable alphabetical output
+    std::vector<std::string> vertices;
+    vertices.reserve(res.distances.size());
+    for (const auto& p : res.distances) vertices.push_back(p.first);
+    std::sort(vertices.begin(), vertices.end());
+
+    QString log = QString("Source: %1\nEdges: %2\n\n")
+                      .arg(QString::fromStdString(source))
+                      .arg(edges);
+
+    for (const auto& v : vertices) {
+        int d = res.distances.at(v);
+        log += QString("%1: %2\n")
+                   .arg(QString::fromStdString(v),
+                        d == INT_MAX ? "unreachable" : QString::number(d));
     }
     fileOutput->setPlainText(log);
 }

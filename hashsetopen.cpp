@@ -97,13 +97,7 @@ std::vector<std::string> HashSetOpen::values() const {
 }
 
 // ---------------------------------------------------------------------------
-// Formatted table display
-//
-// Column meanings:
-//   Bucket   -> index in the hash table (0 .. capacity-1)
-//   Key      -> the unique integer identifier used for hashing & lookup
-//   Value    -> the string payload stored alongside the key
-//   Chain    -> the full bucket contents (may hold >1 entry on collision)
+// Formatted plain-text display (kept for compatibility)
 // ---------------------------------------------------------------------------
 QString HashSetOpen::display() const {
     std::ostringstream os;
@@ -114,7 +108,6 @@ QString HashSetOpen::display() const {
        << "   Load Factor: " << std::fixed << std::setprecision(2)
        << loadFactor() << "\n\n";
 
-    // Header
     os << std::left
        << std::setw(8)  << "Bucket"
        << std::setw(10) << "Key"
@@ -139,14 +132,12 @@ QString HashSetOpen::display() const {
                        << std::setw(22) << entry.value;
                     firstRow = false;
                 } else {
-                    // continuation of a collision chain in same bucket
                     os << std::left
                        << std::setw(8)  << ""
                        << std::setw(10) << entry.key
                        << std::setw(22) << entry.value;
                 }
 
-                // Show chain visualization
                 os << "-> ";
                 for (const auto& e : table[i])
                     os << "[" << e.key << ":" << e.value << "] ";
@@ -163,4 +154,107 @@ QString HashSetOpen::display() const {
        << "  Chain  = all entries sharing the same bucket (collisions)\n";
 
     return QString::fromStdString(os.str());
+}
+
+// ---------------------------------------------------------------------------
+// HTML table view — mirrors HashSetClosed::displayAsTable() visually.
+//
+// Columns:
+//   Bucket       -> index in the hash table (0 .. capacity-1)
+//   Status       -> empty / occupied / collision / chain
+//   Key (ID)     -> unique integer used for hashing & lookup
+//   Value        -> text payload stored alongside the key
+//   Hash h(key)  -> the bucket this key hashes to
+//   Chain        -> all (key:value) pairs that share this bucket
+//
+// Row colouring matches closed hashing:
+//   grey  = empty bucket
+//   green = single entry, no collision
+//   blue  = bucket holds >1 entry (chain used to resolve collision)
+// ---------------------------------------------------------------------------
+QString HashSetOpen::displayAsTable() const {
+    QString html;
+    html += "<table cellspacing='0' cellpadding='6' border='1' "
+            "style='border-collapse:collapse; font-family:Consolas,monospace; "
+            "font-size:13px; width:100%;'>";
+
+    html += "<tr style='background:#1a1a1a; color:#ffffff;'>"
+            "<th>Bucket</th>"
+            "<th>Status</th>"
+            "<th>Key (ID)</th>"
+            "<th>Value (Payload)</th>"
+            "<th>Hash h(key)</th>"
+            "<th>Chain (bucket contents)</th>"
+            "</tr>";
+
+    for (int i = 0; i < capacity; i++) {
+        const std::list<Entry>& bucket = table[i];
+
+        // ---- empty bucket ----
+        if (bucket.empty()) {
+            html += QString("<tr style='background:#fafafa;'>"
+                            "<td align='center'>%1</td>"
+                            "<td align='center'>empty</td>"
+                            "<td align='center'>—</td>"
+                            "<td>—</td>"
+                            "<td align='center'>—</td>"
+                            "<td align='center'>—</td>"
+                            "</tr>")
+                        .arg(i);
+            continue;
+        }
+
+        // ---- occupied bucket ----
+        int chainLen = static_cast<int>(bucket.size());
+        bool collision = chainLen > 1;
+        QString bg = collision ? "#e3f2fd"     // blue  = chain / collision
+                               : "#e8f5e9";    // green = single entry
+
+        // Pre-build the full chain string once
+        QString chainStr;
+        {
+            bool first = true;
+            for (const auto& e : bucket) {
+                if (!first) chainStr += " → ";
+                chainStr += QString("[%1:%2]")
+                                .arg(e.key)
+                                .arg(QString::fromStdString(e.value));
+                first = false;
+            }
+            chainStr += " → null";
+        }
+
+        bool firstRow = true;
+        for (const auto& e : bucket) {
+            int home = calculateHash(e.key, capacity);
+
+            QString bucketCell  = firstRow ? QString::number(i) : QString("");
+            QString hashCell    = QString::number(home);
+            QString statusCell  = firstRow
+                                     ? (collision ? "collision"
+                                                  : "occupied")
+                                     : "chain";
+
+            html += QString("<tr style='background:%1;'>"
+                            "<td align='center'>%2</td>"
+                            "<td align='center'>%3</td>"
+                            "<td align='center'>%4</td>"
+                            "<td>%5</td>"
+                            "<td align='center'>%6</td>"
+                            "<td>%7</td>"
+                            "</tr>")
+                        .arg(bg)
+                        .arg(bucketCell)
+                        .arg(statusCell)
+                        .arg(e.key)
+                        .arg(QString::fromStdString(e.value))
+                        .arg(hashCell)
+                        .arg(chainStr);
+
+            firstRow = false;
+        }
+    }
+
+    html += "</table>";
+    return html;
 }

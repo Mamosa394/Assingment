@@ -33,7 +33,8 @@ public:
     std::vector<int> keys() const;                    // all keys
     std::vector<std::string> values() const;          // all values
 
-    QString display() const;                          // formatted table view
+    QString display() const;                          // formatted plain-text view
+    QString displayAsTable() const;                   // NEW: HTML table view
 
 private:
     std::list<Entry>* table;

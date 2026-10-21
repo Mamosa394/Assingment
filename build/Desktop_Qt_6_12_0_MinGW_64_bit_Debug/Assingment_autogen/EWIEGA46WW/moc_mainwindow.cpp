@@ -54,7 +54,12 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "removeClosedItem",
         "calculateRoute",
         "browseFile",
-        "runDijkstraFile"
+        "runDijkstraFile",
+        "doClosedGet",
+        "doClosedContains",
+        "clearClosedSet",
+        "showClosedStatus",
+        "msg"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -84,6 +89,16 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(14, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'runDijkstraFile'
         QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'doClosedGet'
+        QtMocHelpers::SlotData<void()>(16, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'doClosedContains'
+        QtMocHelpers::SlotData<void()>(17, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'clearClosedSet'
+        QtMocHelpers::SlotData<void()>(18, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'showClosedStatus'
+        QtMocHelpers::SlotData<void(const QString &)>(19, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 20 },
+        }}),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -119,6 +134,10 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 9: _t->calculateRoute(); break;
         case 10: _t->browseFile(); break;
         case 11: _t->runDijkstraFile(); break;
+        case 12: _t->doClosedGet(); break;
+        case 13: _t->doClosedContains(); break;
+        case 14: _t->clearClosedSet(); break;
+        case 15: _t->showClosedStatus((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         default: ;
         }
     }
@@ -155,14 +174,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 12)
+        if (_id < 16)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 12;
+        _id -= 16;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 12)
+        if (_id < 16)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 12;
+        _id -= 16;
     }
     return _id;
 }

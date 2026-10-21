@@ -23,6 +23,9 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsLineItem>
 
+#include <unordered_map>
+#include <string>
+
 #include "hashsetopen.h"
 #include "hashsetclosed.h"
 #include "dijkstra.h"
@@ -49,6 +52,12 @@ private slots:
     void calculateRoute();
     void browseFile();
     void runDijkstraFile();
+
+    // ---- Closed-hashing operations ----
+    void doClosedGet();
+    void doClosedContains();
+    void clearClosedSet();
+    void showClosedStatus(const QString& msg);
 
 private:
     QStackedWidget *stack;
@@ -77,14 +86,23 @@ private:
     QLineEdit* closedKeyInput;
     QLineEdit* closedValueInput;
     QTextEdit* closedOutput;
+    QLabel* closedStatusLabel;
 
     // Dijkstra Vars
     QComboBox* startDropdown;
     QComboBox* targetDropdown;
     QLabel* resultDistanceLabel;
     QLabel* resultPathLabel;
+    QTextEdit* resultDistancesTable;                 // NEW
     QGraphicsScene* mapScene;
-    void drawMap(const QString& highlightStart, const QString& highlightTarget);
+
+    // CHANGED: takes the full path so we can highlight every vertex on it
+    void drawMap(const QStringList& pathVertices);
+
+    // NEW: renders the "distance to every town" HTML table
+    QString formatDistanceTable(const std::unordered_map<std::string, int>& distances,
+                                const std::string& startNode,
+                                const std::string& targetNode) const;
 
     // File Vars
     QLineEdit* filePathEdit;

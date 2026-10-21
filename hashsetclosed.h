@@ -34,13 +34,22 @@ public:
     HashSetClosed(const HashSetClosed&) = delete;
     HashSetClosed& operator=(const HashSetClosed&) = delete;
 
-    void insert(int key, const std::string& value);
-    bool get(int key, std::string& outvalue) const;
-    bool contains(int key) const;
-    bool remove(int key);
-    int getCapacity() const { return capacity; }
+    // ---- Core operations ----
+    void insert(int key, const std::string& value);   // insert or update
+    bool get(int key, std::string& outvalue) const;   // lookup value by key
+    bool contains(int key) const;                     // key membership test
+    bool remove(int key);                             // delete (tombstone)
+    void clear();                                     // remove all entries
+
+    // ---- Introspection ----
+    int  getCapacity() const { return capacity; }
+    int  getCount()    const { return count; }
+    bool isEmpty()     const { return count == 0; }
     QStringList rehashLog() const { return rehashMessages; }
-    QString display() const;
+
+    // ---- Rendering ----
+    QString display() const;   // plain-text (kept for compatibility)
+    QString displayAsTable() const; // NEW: HTML table view
 };
 
 #endif
