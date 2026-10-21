@@ -7,6 +7,7 @@
 #include <QScrollArea>
 #include <algorithm>
 #include <vector>
+#include <cmath>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle("Data Structures Assignment 2026");
@@ -28,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         "QPushButton#MenuBtn { background: transparent; color: #9aa0a6; border: none; text-align: left; padding: 14px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; }"
         "QPushButton#MenuBtn:hover { color: #ffffff; background-color: #2d2d2d; }"
         "QPushButton#MenuBtn[active='true'] { color: #1a1a1a; background-color: #ffffff; }"
+
         /* BUTTONS */
         "QPushButton#ActionBtn { background-color: #1a1a1a; color: #ffffff; border: none; border-radius: 6px; padding: 12px 24px; font-weight: bold; font-size: 14px; min-width: 100px; }"
         "QPushButton#ActionBtn:hover { background-color: #333333; }"
@@ -603,17 +605,35 @@ void MainWindow::drawMap(const QStringList& pathVertices) {
     auto drawEdge = [&](QPointF p1, QPointF p2, int weight,
                         const QString& from, const QString& to) {
         bool hot = onPath(from, to);
+
+        // ---- 1. Draw the road ----
         QPen pen(hot ? Qt::black : Qt::gray,
                  hot ? 4 : 3,
                  hot ? Qt::SolidLine : Qt::DashLine);
         mapScene->addLine(p1.x(), p1.y(), p2.x(), p2.y(), pen);
 
+        // ---- 2. Compute an offset PERPENDICULAR to the edge ----
+        QPointF mid  = (p1 + p2) / 2.0;
+        QPointF dir  = p2 - p1;
+        double len   = std::sqrt(dir.x() * dir.x() + dir.y() * dir.y());
+        QPointF unit = (len > 0.0) ? QPointF(dir.x() / len, dir.y() / len)
+                                   : QPointF(0.0, 0.0);
+
+        QPointF perp(-unit.y(), unit.x());
+        if (perp.y() > 0.0) perp = -perp;      // always push UP
+        const double offset = 16.0;            // pixels above the line
+        QPointF labelPos = mid + perp * offset;
+
+        // ---- 3. Draw the label so its CENTER sits at labelPos ----
         QGraphicsTextItem* t = mapScene->addText(QString::number(weight) + " km");
         t->setDefaultTextColor(hot ? Qt::black : Qt::darkGray);
         QFont f = t->font();
         f.setBold(hot);
         t->setFont(f);
-        t->setPos((p1.x() + p2.x())/2 - 15, (p1.y() + p2.y())/2 - 10);
+
+        QRectF br = t->boundingRect();
+        t->setPos(labelPos.x() - br.width() / 2.0,
+                  labelPos.y() - br.height() / 2.0);
     };
 
     drawEdge(pA, pB, 3, "A", "B");
@@ -621,6 +641,7 @@ void MainWindow::drawMap(const QStringList& pathVertices) {
     drawEdge(pB, pD, 2, "B", "D");
     drawEdge(pC, pD, 4, "C", "D");
 
+    // ---- Nodes ----
     auto drawNode = [&](QPointF p, const QString& label, const QString& id) {
         bool hot = pathVertices.contains(id);
         QBrush brush(hot ? Qt::black : Qt::white);
@@ -633,7 +654,10 @@ void MainWindow::drawMap(const QStringList& pathVertices) {
         f.setBold(true);
         f.setPointSize(10);
         t->setFont(f);
-        t->setPos(p.x() - 10, p.y() - 10);
+
+        QRectF br = t->boundingRect();
+        t->setPos(p.x() - br.width() / 2.0,
+                  p.y() - br.height() / 2.0);
     };
 
     drawNode(pA, "A", "A");
@@ -693,12 +717,22 @@ QString MainWindow::formatDistanceTable(const std::unordered_map<std::string, in
 }
 
 void MainWindow::calculateRoute() {
-    // ---- Build the assignment's weighted directed graph ----
+    // ---- Build the assignment's weighted graph ----
+    // The map from Question 2 is a ROAD NETWORK — all roads are two-way.
+    // So every edge is added in BOTH directions.
     std::unordered_map<std::string, std::vector<Edge>> graph;
-    graph["A"] = { Edge("B", 3), Edge("C", 1) };
-    graph["B"] = { Edge("D", 2) };
-    graph["C"] = { Edge("D", 4) };
-    graph["D"] = {};
+
+    auto addUndirected = [&](const std::string& u, const std::string& v, int w) {
+        graph[u].push_back(Edge(v, w));
+        graph[v].push_back(Edge(u, w));
+        if (graph.find(u) == graph.end()) graph[u] = {};
+        if (graph.find(v) == graph.end()) graph[v] = {};
+    };
+
+    addUndirected("A", "B", 3);
+    addUndirected("A", "C", 1);
+    addUndirected("B", "D", 2);
+    addUndirected("C", "D", 4);
 
     // Map the human-readable combo text to node IDs.
     auto textToId = [](const QString& t) -> std::string {
@@ -855,7 +889,11 @@ void MainWindow::runDijkstraFile() {
 
         const std::string u = parts[0].toStdString();
         const std::string v = parts[1].toStdString();
+
+        // Treat the custom graph as an undirected road network as well
         graph[u].push_back(Edge(v, w));
+        graph[v].push_back(Edge(u, w));
+        if (graph.find(u) == graph.end()) graph[u] = {};
         if (graph.find(v) == graph.end()) graph[v] = {};
     }
     if (graph.find(source) == graph.end()) graph[source] = {};
