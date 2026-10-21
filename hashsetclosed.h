@@ -6,6 +6,7 @@
 #include <climits>
 #include <QString>
 #include <QStringList>
+#include "hashstrategy.h"
 
 class HashSetClosed {
 private:
@@ -23,33 +24,42 @@ private:
     QStringList rehashMessages;
     static constexpr double LOAD_FACTOR = 0.5;
 
+    HashStrategy strategy;
+    int homeSlot(int key) const { return strategy.indexFor(key, capacity); }
+
     void insertWithoutRehash(int key, const std::string& value);
     int findExistingKey(int key) const;
-    void rehash();
 
 public:
+    // cap = exact array size (M) chosen by the user
     explicit HashSetClosed(int cap);
     ~HashSetClosed();
 
     HashSetClosed(const HashSetClosed&) = delete;
     HashSetClosed& operator=(const HashSetClosed&) = delete;
 
-    // ---- Core operations ----
-    void insert(int key, const std::string& value);   // insert or update
-    bool get(int key, std::string& outvalue) const;   // lookup value by key
-    bool contains(int key) const;                     // key membership test
-    bool remove(int key);                             // delete (tombstone)
-    void clear();                                     // remove all entries
+    void setHashStrategy(const HashStrategy& s) { strategy = s; }
+    HashStrategy getHashStrategy() const        { return strategy; }
 
-    // ---- Introspection ----
+    void rehashWithStrategy();
+    void resize(int newCapacity);
+
+    void insert(int key, const std::string& value);
+    bool get(int key, std::string& outvalue) const;
+    bool contains(int key) const;
+    bool remove(int key);
+    void clear();
+
     int  getCapacity() const { return capacity; }
     int  getCount()    const { return count; }
     bool isEmpty()     const { return count == 0; }
     QStringList rehashLog() const { return rehashMessages; }
+    double loadFactor() const { return capacity > 0 ? static_cast<double>(count) / capacity : 0.0; }
 
-    // ---- Rendering ----
-    QString display() const;   // plain-text (kept for compatibility)
-    QString displayAsTable() const; // NEW: HTML table view
+    QString display() const;
+    QString displayAsTable() const;
+    QString explainInsert(int key, const std::string& value) const;
+    QString explainRemove(int key) const;
 };
 
 #endif

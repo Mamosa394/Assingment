@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-Debug-6182c72bce2a03496983.json",
+					"jsonFile" : "directory-.-Debug-ee34d64f61d550a4394e.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.16"
@@ -44,7 +44,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Assingment::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Assingment-Debug-c87c10281f7dbf299bc7.json",
+					"jsonFile" : "target-Assingment-Debug-70c276d8f5b7aae4985a.json",
 					"name" : "Assingment",
 					"projectIndex" : 0
 				},

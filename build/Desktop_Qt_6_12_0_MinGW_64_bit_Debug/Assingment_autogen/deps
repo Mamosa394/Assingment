@@ -145,6 +145,7 @@ Assingment_autogen/timestamp: \
 	C:/Qt/6.12.0/mingw_64/include/QtCore/qversiontagging.h \
 	C:/Qt/6.12.0/mingw_64/include/QtCore/qxptype_traits.h \
 	C:/Qt/6.12.0/mingw_64/include/QtCore/qyieldcpu.h \
+	C:/Qt/6.12.0/mingw_64/include/QtGui/QTextCursor \
 	C:/Qt/6.12.0/mingw_64/include/QtGui/qaction.h \
 	C:/Qt/6.12.0/mingw_64/include/QtGui/qbitmap.h \
 	C:/Qt/6.12.0/mingw_64/include/QtGui/qbrush.h \
@@ -714,6 +715,7 @@ Assingment_autogen/timestamp: \
 	C:/Users/BrainTech/Documents/Assingment/hashsetclosed.h \
 	C:/Users/BrainTech/Documents/Assingment/hashsetopen.cpp \
 	C:/Users/BrainTech/Documents/Assingment/hashsetopen.h \
+	C:/Users/BrainTech/Documents/Assingment/hashstrategy.h \
 	C:/Users/BrainTech/Documents/Assingment/main.cpp \
 	C:/Users/BrainTech/Documents/Assingment/mainwindow.cpp \
 	C:/Users/BrainTech/Documents/Assingment/mainwindow.h \

@@ -146,6 +146,7 @@ C:/Users/BrainTech/Documents/Assingment/build/Desktop_Qt_6_12_0_MinGW_64_bit_Deb
   C:/Qt/6.12.0/mingw_64/include/QtCore/qversiontagging.h \
   C:/Qt/6.12.0/mingw_64/include/QtCore/qxptype_traits.h \
   C:/Qt/6.12.0/mingw_64/include/QtCore/qyieldcpu.h \
+  C:/Qt/6.12.0/mingw_64/include/QtGui/QTextCursor \
   C:/Qt/6.12.0/mingw_64/include/QtGui/qaction.h \
   C:/Qt/6.12.0/mingw_64/include/QtGui/qbitmap.h \
   C:/Qt/6.12.0/mingw_64/include/QtGui/qbrush.h \
@@ -495,4 +496,5 @@ C:/Users/BrainTech/Documents/Assingment/build/Desktop_Qt_6_12_0_MinGW_64_bit_Deb
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wctype.h \
   C:/Users/BrainTech/Documents/Assingment/dijkstra.h \
   C:/Users/BrainTech/Documents/Assingment/hashsetclosed.h \
-  C:/Users/BrainTech/Documents/Assingment/hashsetopen.h
+  C:/Users/BrainTech/Documents/Assingment/hashsetopen.h \
+  C:/Users/BrainTech/Documents/Assingment/hashstrategy.h

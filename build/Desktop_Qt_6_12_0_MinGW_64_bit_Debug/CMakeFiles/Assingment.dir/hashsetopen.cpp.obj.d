@@ -285,6 +285,7 @@ CMakeFiles/Assingment.dir/hashsetopen.cpp.obj: \
  C:/Qt/6.12.0/mingw_64/include/QtCore/qstringbuilder.h \
  C:/Qt/6.12.0/mingw_64/include/QtCore/qstringconverter.h \
  C:/Qt/6.12.0/mingw_64/include/QtCore/qstringconverter_base.h \
+ C:\Users\BrainTech\Documents\Assingment\hashstrategy.h \
  C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/climits \
  C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/sstream \
  C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/istream \

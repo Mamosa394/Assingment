@@ -296,4 +296,5 @@ CMakeFiles/Assingment.dir/hashsetclosed.cpp.obj: \
  C:/Qt/6.12.0/mingw_64/include/QtCore/qbytearraylist.h \
  C:/Qt/6.12.0/mingw_64/include/QtCore/qalgorithms.h \
  C:/Qt/6.12.0/mingw_64/include/QtCore/q20bit.h \
- C:/Qt/6.12.0/mingw_64/include/QtCore/qstringmatcher.h
+ C:/Qt/6.12.0/mingw_64/include/QtCore/qstringmatcher.h \
+ C:\Users\BrainTech\Documents\Assingment\hashstrategy.h

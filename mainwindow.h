@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QStackedWidget>
 #include <QTextEdit>
+#include <QTextCursor>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
@@ -22,13 +23,13 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsTextItem>
 #include <QGraphicsLineItem>
-
 #include <unordered_map>
 #include <string>
 
 #include "hashsetopen.h"
 #include "hashsetclosed.h"
 #include "dijkstra.h"
+#include "hashstrategy.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -45,19 +46,21 @@ public slots:
     void setActiveButton(QPushButton* btn);
 
 private slots:
+    void createOpenTable();
     void addOpenItem();
     void removeOpenItem();
+
+    void createClosedTable();
     void addClosedItem();
     void removeClosedItem();
-    void calculateRoute();
-    void browseFile();
-    void runDijkstraFile();
-
-    // ---- Closed-hashing operations ----
     void doClosedGet();
     void doClosedContains();
     void clearClosedSet();
     void showClosedStatus(const QString& msg);
+
+    void calculateRoute();
+    void browseFile();
+    void runDijkstraFile();
 
 private:
     QStackedWidget *stack;
@@ -75,36 +78,53 @@ private:
     QPushButton* btnDijkstra;
     QPushButton* btnFile;
 
-    // Open Hashing Vars
+    // Open Hashing
     HashSetOpen* openSet;
     QLineEdit* openKeyInput;
     QLineEdit* openValueInput;
     QTextEdit* openOutput;
+    QLabel*    openCalcPreview;
+    QTextEdit* openProcessLog;
 
-    // Closed Hashing Vars
+    // Open Hash Config
+    QComboBox* openHashFnCombo;
+    QLineEdit* openModulusEdit;
+    QLineEdit* openUniversalA;
+    QLineEdit* openUniversalB;
+    QLineEdit* openUniversalP;
+    QLabel*    openHashSummary;
+
+    // Closed Hashing
     HashSetClosed* closedSet;
     QLineEdit* closedKeyInput;
     QLineEdit* closedValueInput;
     QTextEdit* closedOutput;
-    QLabel* closedStatusLabel;
+    QLabel*    closedStatusLabel;
+    QLabel*    closedCalcPreview;
+    QTextEdit* closedProcessLog;
 
-    // Dijkstra Vars
+    // Closed Hash Config
+    QComboBox* closedHashFnCombo;
+    QLineEdit* closedModulusEdit;
+    QLineEdit* closedUniversalA;
+    QLineEdit* closedUniversalB;
+    QLineEdit* closedUniversalP;
+    QLabel*    closedHashSummary;
+
+    // Dijkstra
     QComboBox* startDropdown;
     QComboBox* targetDropdown;
     QLabel* resultDistanceLabel;
     QLabel* resultPathLabel;
-    QTextEdit* resultDistancesTable;                 // NEW
+    QTextEdit* resultDistancesTable;
     QGraphicsScene* mapScene;
 
-    // CHANGED: takes the full path so we can highlight every vertex on it
     void drawMap(const QStringList& pathVertices);
-
-    // NEW: renders the "distance to every town" HTML table
     QString formatDistanceTable(const std::unordered_map<std::string, int>& distances,
                                 const std::string& startNode,
                                 const std::string& targetNode) const;
 
-    // File Vars
+    // File
     QLineEdit* filePathEdit;
     QTextEdit* fileOutput;
 };

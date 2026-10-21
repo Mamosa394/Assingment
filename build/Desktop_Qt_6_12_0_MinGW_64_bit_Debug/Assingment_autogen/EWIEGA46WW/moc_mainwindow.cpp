@@ -48,18 +48,20 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "setActiveButton",
         "QPushButton*",
         "btn",
+        "createOpenTable",
         "addOpenItem",
         "removeOpenItem",
+        "createClosedTable",
         "addClosedItem",
         "removeClosedItem",
-        "calculateRoute",
-        "browseFile",
-        "runDijkstraFile",
         "doClosedGet",
         "doClosedContains",
         "clearClosedSet",
         "showClosedStatus",
-        "msg"
+        "msg",
+        "calculateRoute",
+        "browseFile",
+        "runDijkstraFile"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -75,30 +77,34 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void(QPushButton *)>(6, 2, QMC::AccessPublic, QMetaType::Void, {{
             { 0x80000000 | 7, 8 },
         }}),
-        // Slot 'addOpenItem'
+        // Slot 'createOpenTable'
         QtMocHelpers::SlotData<void()>(9, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'removeOpenItem'
+        // Slot 'addOpenItem'
         QtMocHelpers::SlotData<void()>(10, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'addClosedItem'
+        // Slot 'removeOpenItem'
         QtMocHelpers::SlotData<void()>(11, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'removeClosedItem'
+        // Slot 'createClosedTable'
         QtMocHelpers::SlotData<void()>(12, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'calculateRoute'
+        // Slot 'addClosedItem'
         QtMocHelpers::SlotData<void()>(13, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'browseFile'
+        // Slot 'removeClosedItem'
         QtMocHelpers::SlotData<void()>(14, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'runDijkstraFile'
-        QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'doClosedGet'
-        QtMocHelpers::SlotData<void()>(16, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'doClosedContains'
-        QtMocHelpers::SlotData<void()>(17, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(16, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'clearClosedSet'
-        QtMocHelpers::SlotData<void()>(18, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(17, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'showClosedStatus'
-        QtMocHelpers::SlotData<void(const QString &)>(19, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 20 },
+        QtMocHelpers::SlotData<void(const QString &)>(18, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 19 },
         }}),
+        // Slot 'calculateRoute'
+        QtMocHelpers::SlotData<void()>(20, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'browseFile'
+        QtMocHelpers::SlotData<void()>(21, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'runDijkstraFile'
+        QtMocHelpers::SlotData<void()>(22, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -127,17 +133,19 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 2: _t->showDijkstraPage(); break;
         case 3: _t->showFilePage(); break;
         case 4: _t->setActiveButton((*reinterpret_cast<std::add_pointer_t<QPushButton*>>(_a[1]))); break;
-        case 5: _t->addOpenItem(); break;
-        case 6: _t->removeOpenItem(); break;
-        case 7: _t->addClosedItem(); break;
-        case 8: _t->removeClosedItem(); break;
-        case 9: _t->calculateRoute(); break;
-        case 10: _t->browseFile(); break;
-        case 11: _t->runDijkstraFile(); break;
-        case 12: _t->doClosedGet(); break;
-        case 13: _t->doClosedContains(); break;
-        case 14: _t->clearClosedSet(); break;
-        case 15: _t->showClosedStatus((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 5: _t->createOpenTable(); break;
+        case 6: _t->addOpenItem(); break;
+        case 7: _t->removeOpenItem(); break;
+        case 8: _t->createClosedTable(); break;
+        case 9: _t->addClosedItem(); break;
+        case 10: _t->removeClosedItem(); break;
+        case 11: _t->doClosedGet(); break;
+        case 12: _t->doClosedContains(); break;
+        case 13: _t->clearClosedSet(); break;
+        case 14: _t->showClosedStatus((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 15: _t->calculateRoute(); break;
+        case 16: _t->browseFile(); break;
+        case 17: _t->runDijkstraFile(); break;
         default: ;
         }
     }
@@ -174,14 +182,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 16)
+        if (_id < 18)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 18;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 16)
+        if (_id < 18)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 18;
     }
     return _id;
 }

@@ -399,6 +399,7 @@ CMakeFiles/Assingment.dir/mainwindow.cpp.obj: \
  C:/Qt/6.12.0/mingw_64/include/QtGui/qtextcursor.h \
  C:/Qt/6.12.0/mingw_64/include/QtGui/qtextformat.h \
  C:/Qt/6.12.0/mingw_64/include/QtGui/qpen.h \
+ C:/Qt/6.12.0/mingw_64/include/QtGui/QTextCursor \
  C:/Qt/6.12.0/mingw_64/include/QtWidgets/QLineEdit \
  C:/Qt/6.12.0/mingw_64/include/QtWidgets/qlineedit.h \
  C:/Qt/6.12.0/mingw_64/include/QtWidgets/QPushButton \
@@ -490,6 +491,7 @@ CMakeFiles/Assingment.dir/mainwindow.cpp.obj: \
  C:/Qt/6.12.0/mingw_64/include/QtWidgets/QGraphicsLineItem \
  C:\Users\BrainTech\Documents\Assingment\hashsetopen.h \
  C:/Qt/6.12.0/mingw_64/include/QtCore/QString \
+ C:\Users\BrainTech\Documents\Assingment\hashstrategy.h \
  C:\Users\BrainTech\Documents\Assingment\hashsetclosed.h \
  C:\Users\BrainTech\Documents\Assingment\dijkstra.h \
  C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/queue \

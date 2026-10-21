@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <QString>
+#include "hashstrategy.h"
 
 class HashSetOpen {
 public:
@@ -14,32 +15,39 @@ public:
         Entry(int k, const std::string& v) : key(k), value(v) {}
     };
 
+    // cap = exact array size (M) chosen by the user
     explicit HashSetOpen(int cap);
     ~HashSetOpen();
 
-    // Core operations
-    void insert(int key, const std::string& value);   // insert or update
-    bool get(int key, std::string& outvalue) const;   // lookup value by key
-    bool contains(int key) const;                     // key existence check
-    bool remove(int key);                             // delete by key
+    void setHashStrategy(const HashStrategy& s) { strategy = s; }
+    HashStrategy getHashStrategy() const        { return strategy; }
 
-    // Utility / introspection
-    void clear();                                     // remove all entries
-    int  size() const;                                // number of stored entries
-    int  getCapacity() const;                         // number of buckets
-    bool isEmpty() const;                             // size() == 0
-    double loadFactor() const;                        // size / capacity
+    void insert(int key, const std::string& value);
+    bool get(int key, std::string& outvalue) const;
+    bool contains(int key) const;
+    bool remove(int key);
 
-    std::vector<int> keys() const;                    // all keys
-    std::vector<std::string> values() const;          // all values
+    void clear();
+    int  size() const;
+    int  getCapacity() const;
+    int  getCount() const { return count; }
+    bool isEmpty() const;
+    double loadFactor() const;
 
-    QString display() const;                          // formatted plain-text view
-    QString displayAsTable() const;                   // NEW: HTML table view
+    QString display() const;
+    QString displayAsTable() const;
+    QString explainInsert(int key, const std::string& value) const;
+
+    void rehashWithStrategy();
+    void resize(int newCapacity);
 
 private:
     std::list<Entry>* table;
     int capacity;
     int count;
+    HashStrategy strategy;
+
+    int bucketFor(int key) const { return strategy.indexFor(key, capacity); }
 };
 
 #endif
