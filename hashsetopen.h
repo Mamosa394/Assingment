@@ -15,7 +15,7 @@ public:
         Entry(int k, const std::string& v) : key(k), value(v) {}
     };
 
-    // cap = exact array size (M) chosen by the user
+    // cap is the exact array size chosen by the user
     explicit HashSetOpen(int cap);
     ~HashSetOpen();
 
@@ -42,7 +42,7 @@ public:
     void resize(int newCapacity);
 
 private:
-    std::list<Entry>* table;
+    std::list<Entry>* table;     // array of std::list, one per bucket
     int capacity;
     int count;
     HashStrategy strategy;

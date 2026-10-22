@@ -11,11 +11,7 @@
 
 static void populateHashFnCombo(QComboBox* combo) {
     combo->addItem("Division   h(k) = k mod m    ", static_cast<int>(HashFunction::Division));
-    // combo->addItem("Multiplication  h(k) = floor(m * frac(k * 1/phi))   * recommended", static_cast<int>(HashFunction::Multiplicative));
-    // combo->addItem("Mid-square  h(k) = middle digits of k^2", static_cast<int>(HashFunction::MidSquare));
-    // combo->addItem("Universal   h(k) = ((a*k + b) mod p) mod m", static_cast<int>(HashFunction::Universal));
-    // combo->addItem("Custom universal  (enter your own a, b, p)", static_cast<int>(HashFunction::CustomUniversal));
-}
+    }
 
 static HashFunction fnFromCombo(QComboBox* c) {
     return static_cast<HashFunction>(c->currentData().toInt());

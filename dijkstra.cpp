@@ -4,7 +4,7 @@ DijkstraResult runDijkstra(const std::unordered_map<std::string, std::vector<Edg
                            const std::string& source) {
     DijkstraResult result;
 
-    // ---- 1. Reject negative edges up-front (Dijkstra cannot handle them) ----
+    // Reject negative edges up-front  because Dijkstra cannot handle them
     for (const auto& pair : graph) {
         for (const auto& edge : pair.second) {
             if (edge.weight < 0) {
@@ -19,7 +19,7 @@ DijkstraResult runDijkstra(const std::unordered_map<std::string, std::vector<Edg
         }
     }
 
-    // ---- 2. Source must exist in the graph ----
+    // Source must exist in the graph
     if (graph.find(source) == graph.end()) {
         result.valid = false;
         result.sourceExists = false;
@@ -28,7 +28,7 @@ DijkstraResult runDijkstra(const std::unordered_map<std::string, std::vector<Edg
         return result;
     }
 
-    // ---- 3. Initialise every vertex in the graph (not just reachable ones) ----
+    //Initialise every vertex in the graph
     std::unordered_map<std::string, int>  dist;
     std::unordered_map<std::string, std::string> pred;
     std::unordered_map<std::string, bool> visited;
@@ -45,16 +45,16 @@ DijkstraResult runDijkstra(const std::unordered_map<std::string, std::vector<Edg
     }
     dist[source] = 0;
 
-    // ---- 4. Min-heap Dijkstra ----
+    // Min-heap Dijkstra
     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq;
     pq.push(Node(source, 0));
-
+    //repeatedly choose the closest unvisited vertex
     while (!pq.empty()) {
         Node current = pq.top(); pq.pop();
         const std::string& u = current.vertex;
 
         if (visited[u]) continue;
-        if (current.distance != dist[u]) continue;   // stale entry guard
+        if (current.distance != dist[u]) continue;
         visited[u] = true;
 
         auto graphIt = graph.find(u);

@@ -31,7 +31,7 @@ private:
     int findExistingKey(int key) const;
 
 public:
-    // cap = exact array size (M) chosen by the user
+    // capis the exact array size chosen by the user
     explicit HashSetClosed(int cap);
     ~HashSetClosed();
 

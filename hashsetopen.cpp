@@ -13,14 +13,14 @@ HashSetOpen::HashSetOpen(int cap) : table(nullptr), capacity(cap), count(0) {
 HashSetOpen::~HashSetOpen() { delete[] table; }
 
 void HashSetOpen::insert(int key, const std::string& value) {
-    // Chaining can hold more than capacity, but we auto-grow if it gets overly full (alpha > 1.0)
+
     if ((count + 1.0) / capacity > 1.0) {
         resize(capacity * 2);
     }
 
     int index = bucketFor(key);
     for (auto& entry : table[index]) {
-        if (entry.key == key) { entry.value = value; return; }
+        if (entry.key == key) { entry.value = value; return; }     // update
     }
     table[index].emplace_back(key, value);
     count++;

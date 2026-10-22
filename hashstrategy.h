@@ -5,7 +5,7 @@
 #include <cmath>
 #include <climits>
 
-// Pluggable hash function that takes a key and a capacity (M) to produce an index.
+// pluggable hash function that takes a key and a capacity to produce an index.
 enum class HashFunction {
     Division,       // h = key % M
     Multiplicative, // h = floor(M * frac(key * 0.6180339887))
@@ -18,9 +18,9 @@ struct HashStrategy {
     HashFunction fn = HashFunction::Division;
     int a = 3;
     int b = 5;
-    int p = 1000003; // prime > any realistic key
+    int p = 1000003; // prime
 
-    // Core: turn a key into [0, capacity)
+
     int indexFor(int key, int capacity) const {
         long long k = key;
         if (capacity <= 0) return 0;
@@ -33,7 +33,7 @@ struct HashStrategy {
             return static_cast<int>(r);
         }
         case HashFunction::Multiplicative: {
-            const double A = 0.6180339887498949; // 1/phi
+            const double A = 0.6180339887498949;
             double frac = std::fmod(std::fabs(static_cast<double>(k)) * A, 1.0);
             int idx = static_cast<int>(std::floor(m * frac));
             if (idx < 0) idx += static_cast<int>(m);
